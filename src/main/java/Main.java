@@ -13,7 +13,7 @@ public class Main {
     private final static String REMOTE_URL = "https://raw.githubusercontent.com/netology-code/jd-homeworks/master/http/task1/cats";
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(5000)
@@ -23,12 +23,15 @@ public class Main {
                 .build();
 
         HttpGet request = new HttpGet(REMOTE_URL);
-        CloseableHttpResponse response = httpClient.execute(request);
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
 
-        List<Post> posts = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
-        posts.stream()
-                .filter(value -> value.getUpvotes() != null && value.getUpvotes() > 0)
-                .forEach(System.out::println);
+            List<Post> posts = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
+            posts.stream()
+                    .filter(value -> value.getUpvotes() != null && value.getUpvotes() > 0)
+                    .forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
